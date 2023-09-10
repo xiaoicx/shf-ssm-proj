@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.mapper.AdminMapper">
+
+
+    <sql id="AdminField">
+        id,
+        username,
+        password,
+        name,
+        phone,
+        head_url,
+        description,
+        create_time,
+        update_time,
+        is_deleted
+    </sql>
+
+    <select id="findPage" resultType="admin">
+        SELECT
+        <include refid="AdminField"/>
+        FROM
+        acl_admin
+        <where>
+            is_deleted = 0
+
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT("%",#{username},"%")
+            </if>
+
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT("%",#{name},"%")
+            </if>
+
+            <if test="phone != null and phone != ''">
+                AND phone LIKE CONCAT(#{phone},"%")
+            </if>
+
+            <if test="createTimeBegin != null and createTimeBegin != ''">
+                AND create_time >= #{createTimeBegin}
+            </if>
+
+            <if test="createTimeEnd != null and createTimeEnd != ''">
+                AND create_time &lt;= #{createTimeEnd}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        acl_admin(username, password, name, phone, head_url, description)
+        values
+        (#{username}, #{password}, #{name}, #{phone}, #{headUrl}, #{description})
+    </insert>
+
+
+    <select id="selectById" resultType="admin">
+        SELECT
+        <include refid="AdminField"/>
+        FROM
+        acl_admin
+        WHERE
+        is_deleted = 0 AND id = #{id}
+    </select>
+
+    <select id="selectByUserName" resultType="admin">
+        SELECT
+        <include refid="AdminField"/>
+        FROM
+        acl_admin
+        WHERE
+        username = #{username}
+    </select>
+
+    <update id="update" useGeneratedKeys="true" keyProperty="id">
+        UPDATE acl_admin
+        <set>
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="headUrl != null and headUrl != ''">
+                head_url = #{headUrl},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+            update_time=now()
+        </set>
+        WHERE
+        is_deleted = 0 AND id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE acl_admin
+        SET
+        is_deleted = 1
+        WHERE
+        is_deleted = 0 AND id = #{id}
+    </update>
+
+    <select id="selectOtherHouseBrokerByHouseId" resultType="Admin">
+        SELECT
+        <include refid="AdminField"/>
+        FROM
+        acl_admin
+        WHERE id NOT IN(
+            SELECT
+            broker_id
+            FROM
+            hse_house_broker
+            WHERE house_id = #{houseId}
+                <if test="brokerId != null and brokerId != ''">
+                    AND id != #{brokerId}
+                </if>
+                AND is_deleted = 0
+        ) AND is_deleted = 0
+    </select>
+
+</mapper>

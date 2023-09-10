@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.mapper.CommunityMapper">
+
+
+    <sql id="CommunityField">
+        id,
+        name,
+        description,
+        province_id,
+        city_id,
+        area_id,
+        plate_id,
+        address,
+        longitude,
+        latitude,
+        build_years,
+        property_price,
+        property_company,
+        developer,
+        build_num,
+        house_num,
+        average_price,
+        create_time,
+        update_time,
+        is_deleted
+    </sql>
+    <select id="findPage" resultType="community">
+        SELECT
+        <include refid="CommunityField"/>,
+        (select name from hse_dict where id = hc.area_id) as area_name,
+        (select name from hse_dict where id = hc.plate_id) as plate_name
+        FROM
+        hse_community as hc
+        <where>
+            is_deleted = 0
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT("%",#{name},"%")
+            </if>
+
+            <if test="areaId != null and areaId != ''">
+                AND area_id = #{areaId}
+            </if>
+
+            <if test="plateId != null and plateId != ''">
+                AND plate_id = #{plateId}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
+    <select id="findAll" resultType="community">
+        SELECT
+        <include refid="CommunityField"/>
+        FROM
+        hse_community
+        WHERE
+        is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        hse_community (name ,description ,province_id ,city_id ,area_id ,plate_id ,address ,longitude
+        ,latitude ,build_years ,property_price ,property_company ,developer ,build_num ,house_num ,average_price)
+        VALUES
+        (#{name},#{description},#{provinceId},#{cityId},#{areaId},#{plateId},#{address},#{longitude},#{latitude},#{buildYears},
+        #{propertyPrice},#{propertyCompany},#{developer},#{buildNum},#{houseNum},#{averagePrice})
+    </insert>
+
+    <select id="selectById" resultType="community">
+        SELECT
+        <include refid="CommunityField"/>,
+        (select name from hse_dict where id = hc.area_id) as area_name,
+        (select name from hse_dict where id = hc.plate_id) as plate_name
+        FROM
+        hse_community as hc
+        WHERE
+        is_deleted = 0 AND id = #{id}
+    </select>
+
+    <sql id="updateSetFiled">
+        <if test="name != null and name != ''">
+            name=#{name},
+        </if>
+        <if test="description != null  and description != ''">
+            description=#{description},
+        </if>
+        <if test="provinceId != null and provinceId != ''">
+            province_id=#{provinceId},
+        </if>
+        <if test="cityId != null and cityId != ''">
+            city_id=#{cityId},
+        </if>
+        <if test="areaId != null and areaId != ''">
+            area_id=#{areaId},
+        </if>
+        <if test="plateId != null and plateId != ''">
+            plate_id=#{plateId},
+        </if>
+        <if test="address != null and address != ''">
+            address=#{address},
+        </if>
+        <if test="longitude != null and longitude != ''">
+            longitude=#{longitude},
+        </if>
+        <if test="latitude != null and latitude != ''">
+            latitude=#{latitude},
+        </if>
+        <if test="buildYears != null and buildYears != ''">
+            build_years=#{buildYears},
+        </if>
+        <if test="propertyPrice != null and propertyPrice != ''">
+            property_price=#{propertyPrice},
+        </if>
+        <if test="propertyCompany != null and propertyCompany != ''">
+            property_company=#{propertyCompany},
+        </if>
+        <if test="developer != null and developer != ''">
+            developer=#{developer},
+        </if>
+        <if test="buildNum != null and buildNum != ''">
+            build_num=#{latitude},
+        </if>
+        <if test="houseNum != null and houseNum != ''">
+            house_num=#{houseNum},
+        </if>
+        <if test="averagePrice != null and averagePrice != ''">
+            average_price=#{averagePrice},
+        </if>
+    </sql>
+    <update id="update">
+        UPDATE hse_community
+        <set>
+            <include refid="updateSetFiled"/>
+        </set>
+        WHERE is_deleted = 0 AND id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE hse_community
+        SET is_deleted = 1, update_time=now()
+        WHERE is_deleted = 0 AND id = #{id}
+    </update>
+
+
+</mapper>

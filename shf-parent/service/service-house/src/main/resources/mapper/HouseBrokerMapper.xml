@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.mapper.HouseBrokerMapper">
+
+
+    <sql id="HouseBrokerFiled">
+        id,
+        house_id,
+        broker_id,
+        broker_name,
+        broker_head_url,
+        create_time,
+        update_time,
+        is_deleted
+    </sql>
+    <select id="selectHouseBrokerByHouseId" resultType="HouseBroker">
+        SELECT
+        <include refid="HouseBrokerFiled"/>
+        FROM
+        hse_house_broker
+        WHERE
+        is_deleted = 0 and house_id = #{houseId}
+    </select>
+
+    <sql id="insertFiled">
+        house_id,
+        broker_id,
+        broker_name,
+        broker_head_url
+    </sql>
+    <insert id="insert">
+        <selectKey order="AFTER" keyProperty="id" resultType="long">
+            SELECT LAST_INSERT_ID() FROM DUAL
+        </selectKey>
+
+        INSERT INTO
+        hse_house_broker(
+        <include refid="insertFiled"/>
+        )
+        VALUES
+        (#{houseId},#{brokerId},#{brokerName},#{brokerHeadUrl})
+    </insert>
+
+    <update id="updateHouseBrokerByOldBrokerId">
+        UPDATE hse_house_broker
+        <set>
+            <if test="houseBroker.houseId != null and houseBroker.houseId != ''">
+                house_id = #{houseBroker.houseId},
+            </if>
+            <if test="houseBroker.brokerId != null and houseBroker.brokerId != ''">
+                broker_id = #{houseBroker.brokerId},
+            </if>
+            <if test="houseBroker.brokerName != null and houseBroker.brokerName != ''">
+                broker_name = #{houseBroker.brokerName},
+            </if>
+            <if test="houseBroker.brokerHeadUrl != null and houseBroker.brokerHeadUrl != ''">
+                broker_head_url = #{houseBroker.brokerHeadUrl},
+            </if>
+            update_time=now()
+        </set>
+        WHERE
+        is_deleted = 0 AND id = #{oldId}
+    </update>
+
+    <select id="selectById" resultType="houseBroker">
+        SELECT
+        <include refid="HouseBrokerFiled"/>
+        FROM
+        hse_house_broker
+        WHERE
+        is_deleted = 0 AND id = #{id}
+    </select>
+
+    <update id="deleteByHouseIdAndBrikerId">
+        UPDATE hse_house_broker
+        SET is_deleted = 1
+        WHERE is_deleted = 0
+          AND house_id = #{houseId}
+          AND id = #{id}
+    </update>
+</mapper>

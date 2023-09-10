@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.mapper.UserFollowMapper">
+
+
+    <sql id="UserFollowFiled">
+        id,
+        user_id,
+        house_id,
+        create_time,
+        update_time,
+        is_deleted
+    </sql>
+
+    <select id="selectByUserIdAndHouseId" resultType="userFollow">
+        SELECT
+        <include refid="UserFollowFiled"/>
+        FROM
+        user_follow
+        WHERE is_deleted = 0 AND user_id = #{userId} AND house_id = #{houseId}
+    </select>
+
+
+    <insert id="insert">
+        <selectKey order="AFTER" keyProperty="id" resultType="long">
+            SELECT LAST_INSERT_ID() FROM DUAL
+        </selectKey>
+        INSERT INTO user_follow(user_id,house_id)
+        VALUES (#{userId},#{houseId})
+    </insert>
+
+    <select id="selectListByUserId" resultType="UserFollow">
+        SELECT
+        <include refid="UserFollowFiled"/>
+        FROM user_follow
+        WHERE
+        is_deleted = 0 AND user_id = #{userId}
+    </select>
+
+    <update id="deleteByUserIdAndHouseId">
+        UPDATE user_follow
+        SET is_deleted = 1
+        WHERE is_deleted = 0
+          AND user_id = #{userId}
+          AND house_id = #{houseId}
+    </update>
+
+</mapper>
+

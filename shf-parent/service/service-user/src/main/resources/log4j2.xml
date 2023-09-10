@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--日志级别以及优先级排序：OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!--Configuration后面的status用于设置log4j2自身内部的信息新出，可以不设置。当设置成trace时，可以看到log4j2内部各种详细输出-->
+<configuration status="INFO">
+    <!--先定义所有的appender-->
+    <appenders>
+        <!--输出日志信息到控制台-->
+        <console name="Console" target="SYSTEM_OUT">
+            <!--控制日志输出的格式-->
+            <!--<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+            <!--输出日志的格式:
+                 %d{yyyy-MM-dd HH:mm:ss.SSS}: 时间
+                 %highlight{%-5level}: 高亮显示日志等级
+                 [%t]: 输出日志线程的名字
+                 %highlight{%c{1.8.*}.%M(%L)}: 高亮显示方法全类名以及日志行数
+                    %c{1.8.*}: 表示%c{1.8.*} 	org.apache.commons.test.Foo 	org.apache.commons.test.Foo
+                    %M: 方法名
+                    %L: 输出日志的行数
+                 %msg%n: 日志完整信息加换行
+            -->
+            <!--<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level} [%t] %highlight{%c{1.*.1.}.%M(line=%L)}: %msg%n" />-->
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level}{ERROR=Bright RED, WARN=Bright Yellow,
+                    INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White} -- [%t] %style{%c{1.*.1.}.%M(line=%L)}{ FG_Magenta}: %msg%n"/>
+            <!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+        </console>
+    </appenders>
+    <!--然后定义logger，只有定义了logger并引入appender，appender才会生效-->
+    <!--root：用于指定项目的根日志，如果没有单独指定logger，则会使用root作为默认的日志输出-->
+    <loggers>
+        <root level="debug">
+            <appender-ref ref="Console"/>
+        </root>
+    </loggers>
+</configuration>

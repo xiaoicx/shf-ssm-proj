@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.mapper.PermissionMapper">
+
+    <sql id="PermissionFiled">
+        id,
+        parent_id,
+        name,
+        url,
+        code,
+        type,
+        sort,
+        create_time,
+        update_time,
+        is_deleted
+    </sql>
+    <select id="findAll" resultType="permission">
+        SELECT
+        <include refid="PermissionFiled"/>
+        FROM
+        acl_permission
+        WHERE
+        is_deleted = 0
+    </select>
+
+
+    <select id="selectPermissionListByParentId" resultType="permission">
+        SELECT
+        <include refid="PermissionFiled"/>
+        FROM
+        acl_permission
+        WHERE is_deleted = 0 AND parent_id = #{parentId}
+    </select>
+    <select id="selectPermissionListByAdminId" resultType="permission">
+        SELECT DISTINCT ap.id,
+                        ap.parent_id,
+                        ap.name,
+                        ap.url,
+                        ap.code,
+                        ap.type,
+                        ap.sort,
+                        ap.create_time,
+                        ap.update_time,
+                        ap.is_deleted
+        FROM acl_permission AS ap
+                 INNER JOIN acl_role_permission AS arp ON ap.id = arp.permission_id
+                 INNER JOIN acl_admin_role AS aar ON aar.role_id = arp.role_id
+        WHERE aar.admin_id = #{adminId}
+          AND aar.is_deleted = 0
+          AND arp.is_deleted = 0
+          AND ap.is_deleted = 0
+    </select>
+
+    <insert id="insert">
+        <selectKey order="AFTER" keyProperty="id" resultType="long">
+            SELECT LAST_INSERT_ID() FROM DUAL
+        </selectKey>
+        INSERT INTO
+        acl_permission(
+        parent_id,
+        name,
+        url,
+        code,
+        type,
+        sort
+        )
+        VALUES
+        (#{parentId},#{name},#{url},#{code},#{type},#{sort})
+    </insert>
+
+    <select id="selectPermissionByName" resultType="permission">
+        SELECT
+        <include refid="PermissionFiled"/>
+        FROM
+        acl_permission
+        WHERE is_deleted = 0 AND name = #{name}
+    </select>
+
+
+    <select id="selectById" resultType="permission">
+        SELECT
+        <include refid="PermissionFiled"/>
+        FROM
+        acl_permission
+        WHERE
+        is_deleted = 0 AND id = #{id}
+    </select>
+
+    <update id="update">
+        UPDATE acl_permission
+        <set>
+            <if test="parentId != null and parentId != ''">
+                parent_id = #{parentId},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="url != null and url != ''">
+                url = #{url},
+            </if>
+            <if test="code != null and code != ''">
+                code = #{code},
+            </if>
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if>
+            <if test="sort >= 0">
+                sort = #{sort},
+            </if>
+            update_time = now()
+        </set>
+        WHERE
+        id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE acl_permission
+        SET is_deleted  = 1,
+            update_time = now()
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+</mapper>
